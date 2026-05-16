@@ -4,6 +4,7 @@ import Dashboard from './components/Dashboard'
 import Chat from './components/Chat'
 import Goals from './components/Goals'
 import Navbar from './components/Navbar'
+import ResetPassword from './components/ResetPassword'
 import { loadData, saveData, clearUser } from './utils/storage'
 import ErrorBoundary from './ErrorBoundary'
 
@@ -11,6 +12,9 @@ export default function App() {
   const [user, setUser] = useState(null)
   const [view, setView] = useState('dashboard')
   const [data, setData] = useState(() => loadData())
+
+  const params = new URLSearchParams(window.location.search)
+  const resetToken = params.get('reset')
 
   useEffect(()=>{
     saveData(data)
@@ -25,6 +29,8 @@ export default function App() {
     clearUser()
     setUser(null)
   }
+
+  if(resetToken) return <ResetPassword />
 
   if(!user) return <Auth onLogin={handleLogin} initialData={data} setData={setData} />
 

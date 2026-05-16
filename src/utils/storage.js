@@ -17,3 +17,9 @@ export function saveData(data){ localStorage.setItem(DATA_KEY, JSON.stringify(da
 export function formatCurrency(v){
   return (Number(v)||0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
+
+// Password reset token helpers (stored locally — no email server)
+const RESET_KEY = 'financas_reset'
+export function saveResetToken(obj){ localStorage.setItem(RESET_KEY, JSON.stringify(obj)) }
+export function loadResetToken(){ try{ return JSON.parse(localStorage.getItem(RESET_KEY)) }catch{return null} }
+export function clearResetToken(){ localStorage.removeItem(RESET_KEY) }

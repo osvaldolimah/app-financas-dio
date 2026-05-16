@@ -5,7 +5,7 @@ import Chat from './components/Chat'
 import Goals from './components/Goals'
 import Navbar from './components/Navbar'
 import ResetPassword from './components/ResetPassword'
-import { loadData, saveData, clearUser } from './utils/storage'
+import { loadData, saveData } from './utils/storage'
 import ErrorBoundary from './ErrorBoundary'
 
 export default function App() {
@@ -26,7 +26,6 @@ export default function App() {
   }
 
   function handleLogout(){
-    clearUser()
     setUser(null)
   }
 

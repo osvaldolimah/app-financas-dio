@@ -60,7 +60,7 @@ function handleForgot(){
   const expires = Date.now() + 1000*60*60 // 1 hour
   const tokenObj = { token, email, expires }
   saveResetToken(tokenObj)
-  const resetLink = `${window.location.origin}${window.location.pathname}?reset=${token}`
+  const resetLink = `${window.location.origin}${window.location.pathname}#/reset?token=${token}`
   const subject = encodeURIComponent('Redefinição de senha - Finanças MVP')
   const body = encodeURIComponent(`Use este link para redefinir sua senha:\n\n${resetLink}\n\nSe você não solicitou, ignore.`)
   // Open mail client with prefilled message

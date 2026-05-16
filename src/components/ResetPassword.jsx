@@ -8,8 +8,7 @@ export default function ResetPassword(){
   const [confirm, setConfirm] = useState('')
 
   useEffect(()=>{
-    const params = new URLSearchParams(window.location.search)
-    const token = params.get('reset')
+    const token = getResetTokenFromLocation()
     const obj = loadResetToken()
     if(obj && obj.token === token && obj.expires > Date.now()){
       setTokenObj(obj)
@@ -53,4 +52,15 @@ export default function ResetPassword(){
       </form>
     </div>
   )
+}
+
+function getResetTokenFromLocation(){
+  const params = new URLSearchParams(window.location.search)
+  const queryToken = params.get('reset')
+  if(queryToken) return queryToken
+
+  const hash = window.location.hash || ''
+  const hashQuery = hash.includes('?') ? hash.split('?')[1] : hash.replace(/^#\/?/, '')
+  const hashParams = new URLSearchParams(hashQuery)
+  return hashParams.get('token') || hashParams.get('reset') || null
 }

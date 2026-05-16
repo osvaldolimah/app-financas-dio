@@ -13,8 +13,7 @@ export default function App() {
   const [view, setView] = useState('dashboard')
   const [data, setData] = useState(() => loadData())
 
-  const params = new URLSearchParams(window.location.search)
-  const resetToken = params.get('reset')
+  const resetToken = getResetTokenFromLocation()
 
   useEffect(()=>{
     saveData(data)
@@ -45,4 +44,16 @@ export default function App() {
       </div>
     </ErrorBoundary>
   )
+}
+
+function getResetTokenFromLocation(){
+  const params = new URLSearchParams(window.location.search)
+  const queryToken = params.get('reset')
+  if(queryToken) return queryToken
+
+  const hash = window.location.hash || ''
+  // supports URLs like #/reset?token=abc123 or #reset=abc123
+  const hashQuery = hash.includes('?') ? hash.split('?')[1] : hash.replace(/^#\/?/, '')
+  const hashParams = new URLSearchParams(hashQuery)
+  return hashParams.get('token') || hashParams.get('reset') || null
 }

@@ -7,24 +7,35 @@ function parseAmount(text){
 }
 
 const expenseCategories = ['Alimentação', 'Transporte', 'Contas Fixas', 'Lazer', 'Saúde', 'Educação', 'Compras', 'Outros']
-const investmentAssets = ['Tesouro', 'SELIC', 'Poupança', 'CDB', 'LCI', 'LCA', 'FII', 'Ações', 'Outros investimentos']
+const investmentAssets = ['Tesouro', 'SELIC', 'Poupança', 'CDB', 'LCI', 'LCA', 'FII', 'Ações', 'Dólar', 'Outros investimentos']
 
 function matchExpenseCategory(lower){
   const patterns = [
-    { category: 'Alimentação', re: /ifood|mercado|supermercado|restaurante|padaria|comida|alimentaç|almoço|jantar|merenda/i },
-    { category: 'Transporte', re: /uber|taxi|táxi|gasolina|posto|transporte|ônibus|onibus|metrô|metro|trem/i },
-    { category: 'Contas Fixas', re: /luz|internet|água|agua|telefone|conta|aluguel|energia|gás|gas/i },
-    { category: 'Lazer', re: /cinema|bar|viagem|show|entretenimento|lazer|festa/i },
-    { category: 'Saúde', re: /farmácia|farmacia|remédio|remedio|médico|medico|saúde|saude|hospital/i },
-    { category: 'Educação', re: /curso|faculdade|cursinho|livro|educaç|educa|escola/i },
-    { category: 'Compras', re: /roupa|calçado|calcado|eletrônico|eletronico|celular|notebook|compra|compras|shopping/i },
+    { category: 'Alimentação', words: ['ifood', 'mercado', 'supermercado', 'restaurante', 'padaria', 'comida', 'alimentação', 'alimentacao', 'almoço', 'almoco', 'jantar', 'merenda', 'pizza', 'lanche', 'hamburguer'] },
+    { category: 'Transporte', words: ['uber', 'taxi', 'táxi', 'gasolina', 'posto', 'transporte', 'ônibus', 'onibus', 'metrô', 'metro', 'trem', 'passagem'] },
+    { category: 'Contas Fixas', words: ['luz', 'internet', 'água', 'agua', 'telefone', 'conta', 'contas', 'aluguel', 'energia', 'gás', 'gas', 'boleto'] },
+    { category: 'Lazer', words: ['cinema', 'bar', 'viagem', 'show', 'entretenimento', 'lazer', 'festa', 'passeio'] },
+    { category: 'Saúde', words: ['farmácia', 'farmacia', 'remédio', 'remedio', 'médico', 'medico', 'saúde', 'saude', 'hospital', 'exame', 'dentista'] },
+    { category: 'Educação', words: ['curso', 'faculdade', 'cursinho', 'livro', 'educação', 'educacao', 'escola', 'aula'] },
+    { category: 'Compras', words: ['roupa', 'roupas', 'calçado', 'calcado', 'eletrônico', 'eletronico', 'celular', 'notebook', 'compra', 'compras', 'shopping', 'presente'] },
   ]
 
-  const exact = patterns.filter(item => item.re.test(lower))
-  if(exact.length === 1) return { type: 'category', category: exact[0].category, confidence: 'exact' }
-  if(exact.length > 1) return { type: 'ambiguous', candidates: exact.map(item => item.category) }
+  function hasWord(text, word) {
+    const regex = new RegExp(`(^|[^a-zA-ZÀ-ÿ0-9])${word}([^a-zA-ZÀ-ÿ0-9]|$)`, 'i')
+    return regex.test(text)
+  }
 
-  const weak = expenseCategories.filter(cat => cat !== 'Outros').filter(cat => lower.includes(cat.toLowerCase().split(' ')[0]))
+  const matchedCategories = []
+  patterns.forEach(p => {
+    if (p.words.some(w => hasWord(lower, w))) {
+      matchedCategories.push(p.category)
+    }
+  })
+
+  if(matchedCategories.length === 1) return { type: 'category', category: matchedCategories[0], confidence: 'exact' }
+  if(matchedCategories.length > 1) return { type: 'ambiguous', candidates: matchedCategories }
+
+  const weak = expenseCategories.filter(cat => cat !== 'Outros').filter(cat => hasWord(lower, cat.toLowerCase().split(' ')[0]))
   if(weak.length === 1) return { type: 'ambiguous', candidates: weak }
   if(weak.length > 1) return { type: 'ambiguous', candidates: weak }
 
@@ -33,19 +44,31 @@ function matchExpenseCategory(lower){
 
 function matchInvestmentAsset(lower){
   const patterns = [
-    { asset: 'Tesouro', re: /tesouro/i },
-    { asset: 'SELIC', re: /selic/i },
-    { asset: 'Poupança', re: /poupanç|poupanca/i },
-    { asset: 'CDB', re: /cdb/i },
-    { asset: 'LCI', re: /lci/i },
-    { asset: 'LCA', re: /lca/i },
-    { asset: 'FII', re: /fii/i },
-    { asset: 'Ações', re: /ações|acoes/i },
+    { asset: 'Tesouro', words: ['tesouro'] },
+    { asset: 'SELIC', words: ['selic'] },
+    { asset: 'Poupança', words: ['poupança', 'poupanca'] },
+    { asset: 'CDB', words: ['cdb'] },
+    { asset: 'LCI', words: ['lci'] },
+    { asset: 'LCA', words: ['lca'] },
+    { asset: 'FII', words: ['fii', 'fiis'] },
+    { asset: 'Ações', words: ['ações', 'acoes', 'ação', 'acao'] },
+    { asset: 'Dólar', words: ['dólar', 'dolar', 'dólares', 'dolares', 'usd'] },
   ]
 
-  const exact = patterns.filter(item => item.re.test(lower))
-  if(exact.length === 1) return { type: 'asset', asset: exact[0].asset, confidence: 'exact' }
-  if(exact.length > 1) return { type: 'ambiguous', candidates: exact.map(item => item.asset) }
+  function hasWord(text, word) {
+    const regex = new RegExp(`(^|[^a-zA-ZÀ-ÿ0-9])${word}([^a-zA-ZÀ-ÿ0-9]|$)`, 'i')
+    return regex.test(text)
+  }
+
+  const matchedAssets = []
+  patterns.forEach(p => {
+    if (p.words.some(w => hasWord(lower, w))) {
+      matchedAssets.push(p.asset)
+    }
+  })
+
+  if(matchedAssets.length === 1) return { type: 'asset', asset: matchedAssets[0], confidence: 'exact' }
+  if(matchedAssets.length > 1) return { type: 'ambiguous', candidates: matchedAssets }
 
   return { type: 'ambiguous', candidates: investmentAssets }
 }
@@ -83,7 +106,7 @@ export function parseMessage(text, data){
   let reply = ''
 
   // Deposits / ganhos
-  if(/depositei|guardei|recebi|sal(á|a)rio|receb(i|e)/i.test(lower)){
+  if(/depositei|guardei|recebi|sal(á|a)rio|receb(i|e)|coloquei/i.test(lower)){
     const amount = parseAmount(text)
     const target = findGoalDepositTarget(lower, data?.goals)
     if(target.type === 'goal'){
@@ -119,8 +142,8 @@ export function parseMessage(text, data){
 
   // Enciclopédia / explicações (modo Warren Buffett)
   // Se a mensagem é uma pergunta ou menciona um ativo sem verbo de ação, responde em modo enciclopédia
-  if(/\b(o que é|como funciona|me explique|\?)\b/i.test(lower) || (/(tesouro|selic|poupança|cdb|lci|lca|fii|ações|juros compostos|inflação)/i.test(lower) && !/(investi|investir|aporte|comprei|gastei|paguei|pago|saquei|retirei)/i.test(lower))){
-    const topicMatch = /(tesouro|selic|poupança|cdb|lci|lca|fii|ações|diversificaçã|diversificar|juros compostos|inflação|renda fixa|renda variável)/i.exec(lower)
+  if(/\b(o que é|como funciona|me explique|\?)\b/i.test(lower) || (/(tesouro|selic|poupança|cdb|lci|lca|fii|ações|dólar|dolar|juros compostos|inflação)/i.test(lower) && !/(investi|investir|aporte|comprei|gastei|paguei|pago|saquei|retirei)/i.test(lower))){
+    const topicMatch = /(tesouro|selic|poupança|cdb|lci|lca|fii|ações|dólar|dolar|diversificaçã|diversificar|juros compostos|inflação|renda fixa|renda variável)/i.exec(lower)
     const topic = topicMatch ? topicMatch[0].toLowerCase() : null
 
     const explanations = {
@@ -131,6 +154,8 @@ export function parseMessage(text, data){
       'lci': 'LCI/LCA: títulos isentos de IR emitidos por bancos, geralmente para financiar setor imobiliário ou crédito agrícola. Boa opção para quem busca renda fixa e isenção fiscal, respeite prazos de carência.',
       'fii': 'FII (Fundos Imobiliários): permitem investir em imóveis de forma fracionada e receber rendimentos. Ideal para renda passiva, mas sujeita à variação de mercado e vacância.',
       'ações': 'Ações: representam participação em empresas. Podem trazer ganhos maiores no longo prazo, mas são voláteis. Invista em empresas que você entende e mantenha horizonte longo.',
+      'dólar': 'Dólar: moeda forte e ativo de proteção (hedge). Ajuda a proteger o patrimônio contra crises locais, mas não gera juros compostos por si só como ações ou renda fixa.',
+      'dolar': 'Dólar: moeda forte e ativo de proteção (hedge). Ajuda a proteger o patrimônio contra crises locais, mas não gera juros compostos por si só como ações ou renda fixa.',
       'diversificaçã': 'Diversificação: distribuir investimentos reduz risco específico. Não coloque tudo em um único ativo nem em algo que você não entende.',
       'juros compostos': 'Juros compostos: é o efeito de ganhar juros sobre juros ao longo do tempo. Começar cedo e reinvestir rendimentos é um dos maiores aliados do investidor.',
       'inflação': 'Inflação: erosão do poder de compra. Proteja-se com ativos que acompanhem ou superem a inflação no longo prazo.',
@@ -201,38 +226,6 @@ export function parseMessage(text, data){
     reply = `Você quer classificar a despesa de ${amount} em qual categoria?`
     return { action: 'clarify', kind: 'expense', amount, candidates: categoryMatch.candidates || expenseCategories, text, reply }
   }
-
-    // Enciclopédia / explicações (modo Warren Buffett)
-    if(/\b(o que é|como funciona|me explique|\?)\b/i.test(lower)){
-      const topicMatch = /(tesouro|selic|poupança|cdb|lci|lca|fii|ações|diversificaçã|diversificar|juros compostos|inflação|renda fixa|renda variável)/i.exec(lower)
-      const topic = topicMatch ? topicMatch[0].toLowerCase() : null
-
-      const explanations = {
-        'tesouro': 'Tesouro Direto: títulos públicos são empréstimos ao governo. São opções de baixo risco relativo e úteis para reserva de emergência ou objetivos de médio prazo. Prefira títulos atrelados à inflação para proteger seu poder de compra.',
-        'selic': 'SELIC: é a taxa básica de juros do país. Afeta rendimentos de renda fixa e o custo de crédito. Quando a Selic sobe, renda fixa costuma render mais; quando cai, renda variável pode se valorizar.',
-        'poupança': 'Poupança: produto simples e líquido, mas historicamente com rendimento baixo após impostos e inflação. Útil apenas por simplicidade; para objetivos financeiros, há alternativas melhores.',
-        'cdb': 'CDB: um título emitido por bancos. Pode pagar taxa fixa ou atrelada a % do CDI. Verifique a solidez do emissor e liquidez antes de aplicar.',
-        'lci': 'LCI/LCA: títulos isentos de IR emitidos por bancos, geralmente para financiar setor imobiliário ou crédito agrícola. Boa opção para quem busca renda fixa e isenção fiscal, respeite prazos de carência.',
-        'fii': 'FII (Fundos Imobiliários): permitem investir em imóveis de forma fracionada e receber rendimentos. Ideal para renda passiva, mas sujeita à variação de mercado e vacância.',
-        'ações': 'Ações: representam participação em empresas. Podem trazer ganhos maiores no longo prazo, mas são voláteis. Invista em empresas que você entende e mantenha horizonte longo.',
-        'diversificaçã': 'Diversificação: distribuir investimentos reduz risco específico. Não coloque tudo em um único ativo nem em algo que você não entende.',
-        'juros compostos': 'Juros compostos: é o efeito de ganhar juros sobre juros ao longo do tempo. Começar cedo e reinvestir rendimentos é um dos maiores aliados do investidor.',
-        'inflação': 'Inflação: erosão do poder de compra. Proteja-se com ativos que acompanhem ou superem a inflação no longo prazo.',
-        'renda fixa': 'Renda fixa: ativos com promessa de pagamento de juros (ex.: títulos públicos, CDB). Menor volatilidade que ações, bom para reserva de emergência e objetivos definidos.',
-        'renda variável': 'Renda variável: inclui ações e fundos, com maior volatilidade e potencial de retorno no longo prazo. Requer tolerância a oscilações.'
-      }
-
-      let core = 'Não invista no que você não entende. Priorize primeiro uma reserva de emergência e mantenha disciplina.'
-      if(topic){
-        // map partial keys
-        const key = Object.keys(explanations).find(k=>topic.indexOf(k) !== -1)
-        if(key) core = explanations[key]
-      }
-
-      const advice = `Tom: acolhedor e prático. ${core} Uma boa regra: gaste menos do que ganha, poupe regularmente e reinvista. Pense no horizonte e nos custos (taxas e impostos).`
-      reply = `Warren Buffett diria: ${advice}`
-      return { action: 'explain', reply }
-    }
 
   // fallback
   reply = `Não entendi totalmente. Diga por exemplo: "gastei 50 no mercado" ou "investi 200 em tesouro".`

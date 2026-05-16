@@ -3,10 +3,10 @@ import Auth from './components/Auth'
 import Dashboard from './components/Dashboard'
 import Chat from './components/Chat'
 import Goals from './components/Goals'
+import Help from './components/Help'
 import Navbar from './components/Navbar'
 import ResetPassword from './components/ResetPassword'
 import { loadData, saveData } from './utils/storage'
-import ErrorBoundary from './ErrorBoundary'
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -33,16 +33,20 @@ export default function App() {
   if(!user) return <Auth onLogin={handleLogin} initialData={data} setData={setData} />
 
   return (
-    <ErrorBoundary>
-      <div className="min-h-screen bg-gray-50 text-gray-900">
-        <div className="max-w-xl mx-auto p-4">
-          {view === 'dashboard' && <Dashboard data={data} setData={setData} onLogout={handleLogout} />}
+      <div className="relative min-h-screen overflow-hidden text-slate-100">
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          <div className="absolute -top-24 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
+          <div className="absolute right-0 top-1/3 h-96 w-96 rounded-full bg-fuchsia-500/10 blur-3xl" />
+          <div className="absolute bottom-0 left-0 h-80 w-80 rounded-full bg-indigo-500/10 blur-3xl" />
+        </div>
+        <div className="relative mx-auto max-w-6xl px-4 pb-32 pt-5 sm:px-6 lg:px-8">
+          {view === 'dashboard' && <Dashboard data={data} setData={setData} onLogout={handleLogout} setView={setView} />}
           {view === 'chat' && <Chat data={data} setData={setData} />}
           {view === 'goals' && <Goals data={data} setData={setData} />}
+          {view === 'help' && <Help />}
         </div>
         <Navbar view={view} setView={setView} onLogout={handleLogout} />
       </div>
-    </ErrorBoundary>
   )
 }
 

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import { Lock, Sparkles } from 'lucide-react'
 import { loadResetToken, clearResetToken, loadUser, saveUser } from '../utils/storage'
 
 export default function ResetPassword(){
@@ -7,16 +8,16 @@ export default function ResetPassword(){
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
 
-  useEffect(()=>{
+  useEffect(() => {
     const token = getResetTokenFromLocation()
     const obj = loadResetToken()
-    if(obj && obj.token === token && obj.expires > Date.now()){
+    if (obj && obj.token === token && obj.expires > Date.now()) {
       setTokenObj(obj)
       setValid(true)
     } else {
       setValid(false)
     }
-  },[])
+  }, [])
 
   function handleSubmit(e){
     e.preventDefault()
@@ -29,26 +30,41 @@ export default function ResetPassword(){
     saveUser(user)
     clearResetToken()
     alert('Senha redefinida com sucesso. Faça login com a nova senha.')
-    // remove token from URL
     window.history.replaceState(null, '', window.location.pathname)
     window.location.reload()
   }
 
   if(!tokenObj) return (
-    <div className="min-h-screen flex items-center justify-center">
-      <div className="bg-white p-6 rounded shadow">Link de recuperação inválido ou expirado.</div>
+    <div className="min-h-screen flex items-center justify-center px-4 py-10">
+      <div className="w-full max-w-md rounded-[2rem] border border-white/10 bg-white/10 p-6 text-slate-100 shadow-[0_25px_90px_rgba(15,23,42,0.35)] backdrop-blur-xl">
+        <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-100">
+          <Sparkles size={14} /> Recuperação segura
+        </div>
+        <div className="mt-4 rounded-2xl border border-white/10 bg-slate-950/55 p-4">
+          Link de recuperação inválido ou expirado.
+        </div>
+      </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <form onSubmit={handleSubmit} className="w-full max-w-md bg-white p-6 rounded-lg shadow">
-        <h2 className="text-lg font-semibold mb-3">Redefinir senha para {tokenObj.email}</h2>
-        <label className="text-sm">Nova senha</label>
-        <input type="password" className="w-full p-2 border rounded mb-3" value={password} onChange={e=>setPassword(e.target.value)} required />
-        <label className="text-sm">Confirme a nova senha</label>
-        <input type="password" className="w-full p-2 border rounded mb-4" value={confirm} onChange={e=>setConfirm(e.target.value)} required />
-        <button className="w-full bg-green-600 text-white py-2 rounded" type="submit">Redefinir senha</button>
+    <div className="min-h-screen flex items-center justify-center px-4 py-10">
+      <form onSubmit={handleSubmit} className="w-full max-w-md rounded-[2rem] border border-white/10 bg-white/10 p-6 shadow-[0_25px_90px_rgba(15,23,42,0.35)] backdrop-blur-xl sm:p-7">
+        <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-100">
+          <Lock size={14} /> Redefinir senha
+        </div>
+        <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white">Redefinir senha</h2>
+        <p className="mt-2 text-sm text-slate-300/80">Conta: {tokenObj.email}</p>
+
+        <label className="mt-6 block text-sm font-medium text-slate-200">Nova senha</label>
+        <input type="password" className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500" value={password} onChange={e=>setPassword(e.target.value)} required />
+
+        <label className="mt-4 block text-sm font-medium text-slate-200">Confirme a nova senha</label>
+        <input type="password" className="mt-2 w-full rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500" value={confirm} onChange={e=>setConfirm(e.target.value)} required />
+
+        <button className="mt-6 w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-indigo-500 py-3 font-semibold text-slate-950 transition hover:brightness-110" type="submit">
+          Redefinir senha
+        </button>
       </form>
     </div>
   )

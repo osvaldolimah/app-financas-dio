@@ -9,8 +9,17 @@ body {
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;
-	color: #0f172a;
+	color: #e2e8f0;
+	background:
+	  radial-gradient(circle at top, rgba(34, 211, 238, 0.12), transparent 28%),
+	  radial-gradient(circle at right, rgba(168, 85, 247, 0.12), transparent 24%),
+	  linear-gradient(135deg, #020617 0%, #0f172a 50%, #020617 100%);
+	background-attachment: fixed;
 }
+
+::selection { background: rgba(34, 211, 238, 0.24); color: #fff; }
+
+button, input, textarea, select { font: inherit; }
 
 /* Ensure min touch targets */
 .btn-touch { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }

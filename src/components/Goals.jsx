@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Trash2 } from 'lucide-react'
+import { Trash2, ArrowRightLeft, Sparkles } from 'lucide-react'
 import { formatCurrency } from '../utils/storage'
 
 export default function Goals({ data, setData }){
@@ -14,15 +14,35 @@ export default function Goals({ data, setData }){
     setTarget('')
   }
   function deleteGoal(name){
-    setData(prev=> ({ ...prev, goals: (prev.goals||[]).filter(g=>g.name!==name) }))
+    setData(prev => {
+      const targetGoal = (prev.goals || []).find(g => g.name === name)
+      const refundAmount = targetGoal?.current || 0
+      
+      return {
+        ...prev,
+        goals: (prev.goals || []).filter(g => g.name !== name),
+        balance: (prev.balance || 0) + refundAmount,
+        transactions: refundAmount > 0 
+          ? [...(prev.transactions || []), { type: 'withdraw_goal', amount: refundAmount, goal: name, desc: `Estorno por exclusão da meta ${name}`, date: new Date().toISOString() }] 
+          : prev.transactions
+      }
+    })
   }
 
   function withdraw(name){
     setData(prev=>{
-      const next = { ...prev }
-      const g = (next.goals||[]).find(x=>x.name===name)
-      if(g){ const amt = g.current; g.current = 0; next.balance = (next.balance||0) + amt }
-      return next
+      const targetGoal = (prev.goals||[]).find(x=>x.name===name)
+      if(!targetGoal) return prev
+      
+      const amt = targetGoal.current; 
+      const nextGoals = (prev.goals||[]).map(g => g.name === name ? { ...g, current: 0 } : g)
+      
+      return { 
+        ...prev, 
+        goals: nextGoals, 
+        balance: (prev.balance||0) + amt,
+        transactions: [...(prev.transactions||[]), { type: 'withdraw_goal', amount: amt, goal: name, desc: `Saque total da meta ${name}`, date: new Date().toISOString() }]
+      }
     })
   }
 
@@ -31,42 +51,85 @@ export default function Goals({ data, setData }){
   }
 
   return (
-    <div>
-      <h2 className="text-xl font-semibold">Metas & Validação</h2>
-
-      <div className="mt-4 space-y-3">
-        <form onSubmit={createGoal} className="bg-white p-3 rounded shadow mb-3">
-          <div className="flex gap-2">
-            <input className="flex-1 border p-2 rounded" placeholder="Nome da meta (ex: Reserva)" value={name} onChange={e=>setName(e.target.value)} />
-            <input className="w-32 border p-2 rounded" placeholder="Valor" value={target} onChange={e=>setTarget(e.target.value)} />
-            <button className="bg-blue-600 text-white px-3 py-2 rounded" type="submit">Criar</button>
-          </div>
-        </form>
-        {(data.goals||[]).map((g,i)=> (
-          <div key={i} className="bg-white p-3 rounded shadow flex items-center justify-between">
-            <div>
-              <div className="font-semibold">{g.name}</div>
-              <div className="text-sm text-gray-500">{formatCurrency(g.current)} / {formatCurrency(g.target)}</div>
-              <div className="w-full bg-gray-200 h-2 rounded mt-2"><div style={{width: `${Math.min(100, (g.current/g.target||0)*100)}%`}} className="h-2 bg-green-500 rounded"/></div>
-            </div>
-            <div className="flex flex-col gap-2">
-              <button className="p-2 bg-red-100 rounded" onClick={()=>deleteGoal(g.name)} aria-label="excluir-meta"><Trash2 /></button>
-              <button className="p-2 bg-yellow-100 rounded" onClick={()=>withdraw(g.name)}>Sacar</button>
-            </div>
-          </div>
-        ))}
-
-        {!(data.goals||[]).length && <div className="text-sm text-gray-500">Nenhuma meta criada.</div>}
-      </div>
-
-      <div className="mt-6 bg-white p-3 rounded shadow">
-        <div className="font-semibold">Este app está te ajudando?</div>
-        <div className="mt-2 flex gap-2">
-          <button className="bg-green-600 text-white px-3 py-2 rounded" onClick={()=>voteFeedback('yes')}>Sim</button>
-          <button className="bg-gray-200 px-3 py-2 rounded" onClick={()=>voteFeedback('no')}>Não</button>
+    <div className="space-y-6">
+      <header className="rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_80px_rgba(15,23,42,0.3)] backdrop-blur-xl">
+        <div className="inline-flex items-center gap-2 rounded-full border border-fuchsia-400/20 bg-fuchsia-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-fuchsia-100">
+          <Sparkles size={14} />
+          Metas dinâmicas
         </div>
-        <div className="text-sm text-gray-500 mt-2">Sim: {data.metaFeedback?.yes||0} • Não: {data.metaFeedback?.no||0}</div>
+        <h2 className="mt-3 text-3xl font-semibold tracking-tight text-white">Caixinhas de investimento</h2>
+        <p className="mt-2 max-w-2xl text-sm text-slate-300/80">Crie objetivos, acompanhe o progresso com barras suaves e use as ações discretas para sacar ou excluir quando quiser.</p>
+      </header>
+
+      <form onSubmit={createGoal} className="rounded-[2rem] border border-white/10 bg-white/5 p-4 shadow-[0_20px_80px_rgba(15,23,42,0.3)] backdrop-blur-xl">
+        <div className="grid gap-3 md:grid-cols-[1.4fr_0.7fr_auto]">
+          <input
+            className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500"
+            placeholder="Nome da meta (ex: Reserva Premium)"
+            value={name}
+            onChange={e => setName(e.target.value)}
+          />
+          <input
+            className="rounded-2xl border border-white/10 bg-slate-950/60 px-4 py-3 text-slate-100 outline-none placeholder:text-slate-500"
+            placeholder="Valor-alvo"
+            value={target}
+            onChange={e => setTarget(e.target.value)}
+          />
+          <button className="rounded-2xl bg-gradient-to-r from-cyan-400 to-indigo-500 px-5 py-3 font-semibold text-slate-950 transition hover:brightness-110" type="submit">
+            Criar meta
+          </button>
+        </div>
+      </form>
+
+      <div className="grid gap-4 lg:grid-cols-2">
+        {(data.goals || []).map((g, i) => {
+          const progress = g.target ? Math.min(100, ((g.current || 0) / g.target) * 100) : 0
+          const progressStyle = { width: `${progress}%` }
+
+          return (
+            <article key={i} className="rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_80px_rgba(15,23,42,0.3)] backdrop-blur-xl">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-[11px] uppercase tracking-[0.22em] text-cyan-100/70">Meta premium</div>
+                  <h3 className="mt-1 text-2xl font-semibold text-white">{g.name}</h3>
+                  <p className="mt-2 text-sm text-slate-300/80">{showingAmount(g.current)} / {showingAmount(g.target)} • {progress.toFixed(0)}% concluído</p>
+                </div>
+                <div className="flex flex-col gap-2">
+                  <button className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 transition hover:bg-white/10 hover:text-white" onClick={() => deleteGoal(g.name)} aria-label="excluir-meta" type="button">
+                    <Trash2 size={16} />
+                  </button>
+                  <button className="rounded-full border border-white/10 bg-white/5 p-2 text-slate-300 transition hover:bg-white/10 hover:text-white" onClick={() => withdraw(g.name)} aria-label="sacar-meta" type="button">
+                    <ArrowRightLeft size={16} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-4 h-2 rounded-full bg-white/10">
+                <div className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-indigo-400 transition-all duration-700 ease-out" style={progressStyle} />
+              </div>
+            </article>
+          )
+        })}
+
+        {!(data.goals || []).length && (
+          <div className="rounded-[2rem] border border-dashed border-white/10 bg-slate-950/30 p-8 text-sm text-slate-400 lg:col-span-2">
+            Nenhuma meta criada ainda. Comece com uma caixinha de reserva ou viagem.
+          </div>
+        )}
       </div>
+
+      <section className="rounded-[2rem] border border-white/10 bg-white/5 p-5 shadow-[0_20px_80px_rgba(15,23,42,0.3)] backdrop-blur-xl">
+        <div className="font-semibold text-white">Este app está te ajudando?</div>
+        <div className="mt-3 flex gap-2">
+          <button className="rounded-2xl bg-emerald-500 px-4 py-2 font-semibold text-slate-950 transition hover:brightness-110" onClick={() => voteFeedback('yes')} type="button">Sim</button>
+          <button className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 font-semibold text-slate-200 transition hover:bg-white/10" onClick={() => voteFeedback('no')} type="button">Não</button>
+        </div>
+        <div className="mt-3 text-sm text-slate-400">Sim: {data.metaFeedback?.yes || 0} • Não: {data.metaFeedback?.no || 0}</div>
+      </section>
     </div>
   )
+}
+
+function showingAmount(value){
+  return formatCurrency(value || 0)
 }

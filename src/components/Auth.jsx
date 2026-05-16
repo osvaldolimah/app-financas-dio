@@ -8,21 +8,28 @@ export default function Auth({ onLogin, initialData, setData }){
   function handleSubmit(e){
     e.preventDefault()
     const existing = loadUser()
-    if(existing && existing.email === email){
-      // user exists — check password
-      if(existing.senha !== senha){
-        alert('Senha incorreta para este email.')
-        return
-      }
-      onLogin({ email })
-    } else {
-      // register new user
+    if(!existing){
+      // first-time registration: create the single local user
       const user = { email, senha, createdAt: new Date().toISOString() }
       saveUser(user)
       onLogin({ email })
-      // ensure data exists
       if(!initialData) setData({ balance:0, transactions:[], investments:[], goals:[], metaFeedback: {yes:0, no:0} })
+      return
     }
+
+    // If a user already exists, only allow login for that user
+    if(existing.email !== email){
+      alert('Já existe um usuário registrado neste dispositivo. Use o email cadastrado.')
+      return
+    }
+
+    // same email — check password
+    if(existing.senha !== senha){
+      alert('Senha incorreta para este email.')
+      return
+    }
+
+    onLogin({ email })
   }
 
   return (

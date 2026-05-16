@@ -47,7 +47,7 @@ export default function Auth({ onLogin, initialData, setData }){
     const tokenObj = { token, email: forgotEmail, expires }
     saveResetToken(tokenObj)
 
-    const link = `${window.location.origin}${window.location.pathname}#/reset?token=${token}`
+    const link = `${getPublicResetBaseUrl()}#/reset?token=${token}`
     setResetLink(link)
     setResetInfo('Link de recuperação gerado. Você pode copiá-lo abaixo ou abrir seu cliente de e-mail.')
 
@@ -114,4 +114,12 @@ export default function Auth({ onLogin, initialData, setData }){
       </form>
     </div>
   )
+}
+
+function getPublicResetBaseUrl(){
+  const isLocalHost = ['localhost', '127.0.0.1'].includes(window.location.hostname)
+  if(isLocalHost){
+    return 'https://osvaldolimah.github.io/app-financas-dio/'
+  }
+  return `${window.location.origin}${window.location.pathname}`
 }

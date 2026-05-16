@@ -70,9 +70,7 @@ export default function Auth({ onLogin, initialData, setData }){
     setResetLink(link)
     setResetInfo('Link de recuperação gerado. Você pode copiá-lo abaixo ou abrir seu cliente de e-mail.')
 
-    const subject = encodeURIComponent('Redefinição de senha - Finanças MVP')
-    const body = encodeURIComponent(`Use este link para redefinir sua senha:\n\n${link}\n\nSe você não solicitou, ignore.`)
-    window.location.href = `mailto:${emailToReset}?subject=${subject}&body=${body}`
+    setResetInfo('Link de recuperação gerado. Você pode copiá-lo abaixo.')
   }
 
   return (

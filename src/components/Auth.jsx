@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { saveUser, loadData, saveData } from '../utils/storage'
+import { saveUser, loadUser, loadData, saveData } from '../utils/storage'
 
 export default function Auth({ onLogin, initialData, setData }){
   const [email, setEmail] = useState('')
@@ -7,11 +7,22 @@ export default function Auth({ onLogin, initialData, setData }){
 
   function handleSubmit(e){
     e.preventDefault()
-    const user = { email }
-    saveUser(user)
-    onLogin(user)
-    // ensure data exists
-    if(!initialData) setData({ balance:0, transactions:[], investments:[], goals:[], metaFeedback: {yes:0, no:0} })
+    const existing = loadUser()
+    if(existing && existing.email === email){
+      // user exists — check password
+      if(existing.senha !== senha){
+        alert('Senha incorreta para este email.')
+        return
+      }
+      onLogin({ email })
+    } else {
+      // register new user
+      const user = { email, senha, createdAt: new Date().toISOString() }
+      saveUser(user)
+      onLogin({ email })
+      // ensure data exists
+      if(!initialData) setData({ balance:0, transactions:[], investments:[], goals:[], metaFeedback: {yes:0, no:0} })
+    }
   }
 
   return (

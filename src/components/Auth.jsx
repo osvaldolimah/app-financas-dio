@@ -71,10 +71,7 @@ export default function Auth({ onLogin, initialData, setData }){
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-10">
       <form onSubmit={handleSubmit} className="w-full max-w-md rounded-[2rem] border border-white/10 bg-white/10 p-6 shadow-[0_25px_90px_rgba(15,23,42,0.35)] backdrop-blur-xl sm:p-7">
-        <div className="inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.22em] text-cyan-100">
-          Banco Digital Premium
-        </div>
-        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">Bem-vindo ao Finanças MVP</h1>
+        <h1 className="mt-4 text-3xl font-semibold tracking-tight text-white">Bem-vindo ao Monet.ai</h1>
         <p className="mt-2 text-sm text-slate-300/80">Acesse sua conta local com um visual moderno, seguro e elegante.</p>
 
         <label className="mt-6 block text-sm font-medium text-slate-200">Email</label>

@@ -1,5 +1,5 @@
 
-# App Finanças — MVP
+# Monet.ai
 
 Aplicação SPA (Single Page Application) mobile-first para gestão financeira pessoal, desenvolvida como trabalho do curso "Vibe Coding" na Digital Innovation One (DIO). É um MVP pensado para aprendizado: chat guiado por parser heurístico, metas, controle de receitas/despesas/investimentos e persistência local via LocalStorage.
 
@@ -137,7 +137,7 @@ Recomenda-se não editar manualmente estes valores sem conhecimento prévio.
 ---
 
 Se quiser, eu também posso gerar um workflow de GitHub Actions para build + deploy automático no `gh-pages`.
-# Finanças MVP
+# Monet.ai
 
 Aplicativo SPA mobile-first para organização de finanças pessoais (MVP).
 

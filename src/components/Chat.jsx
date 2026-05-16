@@ -233,14 +233,14 @@ export default function Chat({ data, setData }){
         <div className="flex gap-2 rounded-[1.4rem] border border-white/10 bg-white/5 p-2">
           <input
             aria-label="mensagem"
-            className="flex-1 bg-transparent px-3 py-3 text-slate-100 outline-none placeholder:text-slate-500"
+            className="flex-1 min-w-0 bg-transparent px-3 py-3 text-sm sm:text-base text-slate-100 outline-none placeholder:text-slate-500"
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') send() }}
             placeholder="Escreva sua operação financeira..."
           />
-          <button onClick={send} className="inline-flex items-center gap-2 rounded-[1.1rem] bg-gradient-to-r from-cyan-400 to-indigo-500 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110" type="button">
-            <Send size={16} /> Enviar
+          <button onClick={send} className="inline-flex shrink-0 items-center gap-2 rounded-[1.1rem] bg-gradient-to-r from-cyan-400 to-indigo-500 px-4 py-3 font-semibold text-slate-950 transition hover:brightness-110" type="button">
+            <Send size={16} /> <span className="hidden sm:inline">Enviar</span>
           </button>
         </div>
       </div>

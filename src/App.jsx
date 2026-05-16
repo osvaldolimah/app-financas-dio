@@ -6,10 +6,13 @@ import Goals from './components/Goals'
 import Help from './components/Help'
 import Navbar from './components/Navbar'
 import ResetPassword from './components/ResetPassword'
-import { loadData, saveData } from './utils/storage'
+import { loadData, saveData, loadUser } from './utils/storage'
 
 export default function App() {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(() => {
+    const existing = loadUser()
+    return (existing && existing.email) ? { email: existing.email } : null
+  })
   const [view, setView] = useState('dashboard')
   const [data, setData] = useState(() => loadData())
 
